@@ -65,6 +65,23 @@ provider "google-beta" {
 EOF
 }
 
+# Configure Terragrunt to automatically store tfstate files in GCS bucket
+# (encrypted with locking by default)
+remote_state {
+  backend = "gcs"
+  config = {
+    project  = local.gcp_project
+    location = local.gcp_region
+    bucket   = "id-me-${local.gcp_account}-${local.gcp_region}"
+    prefix   = path_relative_to_include()
+    enable_bucket_policy_only = true
+  }
+  generate = {
+    path      = "gen-backend.tf"
+    if_exists = "overwrite_terragrunt"
+  }
+}
+
 # ---------------------------------------------------------------------------------------------------------------------
 # GLOBAL PARAMETERS
 # These variables apply to all configurations in this subfolder. These are automatically merged into the child
